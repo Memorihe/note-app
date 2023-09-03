@@ -1,25 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import './App.css'
+import { NoteFilter } from './components/noteFilter'
+import { NoteForm } from './components/noteForm'
+import { NoteList } from './components/noteList'
+import { useNotes } from './hooks/note'
 
 function App() {
+  const {
+    handleForm,
+    form,
+    saveNote,
+    handleNotes,
+    filter,
+    handleFilter,
+    handleImportant,
+    handleDelete
+  } = useNotes()
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <section className='App'>
+      <section className='Align-left'>
+        <h1>Lista de notas</h1>
+        <NoteList
+          handleNotes={handleNotes}
+          handleImportant={handleImportant}
+          handleDelete={handleDelete}
+        />
+      </section>
+
+      <section className='Align-rigth'>
+        <NoteFilter
+          filter={filter}
+          handleFilter={handleFilter}
+        />
+
+        <NoteForm
+          handleForm={handleForm}
+          form={form}
+          saveNote={saveNote}
+        />
+      </section>
+    </section>
+  )
 }
 
-export default App;
+export default App

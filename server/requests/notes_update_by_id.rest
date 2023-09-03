@@ -1,0 +1,7 @@
+PUT http://localhost:3001/api/notes/64f3c4a21853226b3f5e2cf8
+Content-Type: application/json
+
+{
+    "content": "VS Code REST 5",
+    "important": false
+}
