@@ -15,6 +15,8 @@ function App() {
     handleImportant,
     handleDelete
   } = useNotes()
+
+  
   return (
     <section className='App'>
       <section className='Align-left'>

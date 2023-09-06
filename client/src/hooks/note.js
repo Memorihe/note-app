@@ -15,7 +15,7 @@ export const useNotes = () => {
 
   useEffect(() => {
     getNotes().then((res) => setNotes(res))
-  }, [notes])
+  }, [])
 
   const importantNotes = filter.important
     ? notes.filter((n) => n.important === true)
