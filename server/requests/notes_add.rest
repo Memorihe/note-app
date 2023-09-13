@@ -2,6 +2,7 @@ POST http://localhost:3001/api/notes
 Content-Type: application/json
 
 {
-    "content": "VS Code REST 2",
-    "important": false
+    "content": "Gran amor",
+    "important": false,
+    "userId": "6501cba0f6e2ec91783d231a"
 }
