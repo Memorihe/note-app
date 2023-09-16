@@ -7,12 +7,21 @@ const api = supertest(app)
 
 const Note = require('../models/note')
 
-beforeEach(async () => {
-  await helper.createTestUser()
-  
+let token = ''
+
+beforeAll(async () => {  
+  await helper.createTestUser() 
+
+  const { body } = await api
+    .post('/api/login')
+    .send({ username: 'root', password: 'sekret' })
+
+  token = `Bearer ${body.token}`
+})
+
+beforeEach(async () => {  
   const usersInDB = await helper.usersInDB()
   const { id } = usersInDB.find((u) => u.username === 'root')
-
   await Note.deleteMany({})
   const noteObjects = helper.initialNotes.map(
     (note) => new Note({ ...note, user: id })
@@ -44,22 +53,20 @@ describe('get notes', () => {
 })
 
 describe('add note', () => {
-  test('a valid note can be added', async () => {    
-  const usersInDB = await helper.usersInDB()
-  const { id } = usersInDB.find((u) => u.username === 'root')
-
+  test('a valid note can be added', async () => {
     const newNote = {
       content: 'async/await simplies making async calls',
-      important: true,
-      userId: id
+      important: true
     }
 
     await api
       .post('/api/notes')
+      .set('Authorization', token)
       .send(newNote)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
+    
     const notesAtEnd = await helper.notesInDB()
     expect(notesAtEnd).toHaveLength(helper.initialNotes.length + 1)
 
@@ -70,13 +77,32 @@ describe('add note', () => {
   test('note without content is not added', async () => {
     const newNote = { important: true }
 
-    await api.post('/api/notes').send(newNote).expect(400)
+    await api.post('/api/notes')
+    .set('Authorization', token)
+    .send(newNote)
+    .expect(400)
 
     const notesAtEnd = await helper.notesInDB()
     expect(notesAtEnd).toHaveLength(helper.initialNotes.length)
   })
 
+  test('add a new note, should not create if token verification fails', async () => {
+    const newNote = {
+      content: 'async/await simplies making async calls',
+      important: true
+    }
 
+    await api.post('/api/notes')
+    .set('Authorization', '')
+    .send(newNote)
+    .expect(401)
+
+    const notesAtEnd = await helper.notesInDB()
+    expect(notesAtEnd).toHaveLength(helper.initialNotes.length)
+
+    const contents = notesAtEnd.map((n) => n.content)
+    expect(contents).not.toContain('async/await simplies making async calls')
+  })
 })
 
 afterAll(() => mongoose.connection.close())

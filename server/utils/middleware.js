@@ -15,12 +15,12 @@ const unknownEndpoint = (request, response, next) => {
 const errorHandler = (error, request, response, next) => {
   logger.error(error.message)
 
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  }
-  
-  if (error.name == 'ValidationError') {
-    return response.status(400).json({ error: error.message })
+  switch (error.name) {
+    case 'CastError': return response.status(400).send({ error: 'malformatted id' })
+    case 'ValidationError': return response.status(400).json({ error: error.message })
+    case 'Unauthorized': return response.status(400).json({ error: 'invalid username or password' })
+    case 'JsonWebTokenError': return response.status(401).json({ error: 'Invaled token' })
+    case 'TokenExpiredError': return response.status(401).json({ error: 'Token expired' })
   }
 
   next(error)

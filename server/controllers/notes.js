@@ -1,6 +1,15 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
+
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.substring(7)
+  }
+  return null
+}
 
 notesRouter.get('/', async (request, response, next) => {
   const notes = await Note.find({})
@@ -9,8 +18,14 @@ notesRouter.get('/', async (request, response, next) => {
 
 notesRouter.post('/', async (request, response, next) => {
   const body = request.body
+  const token = getTokenFrom(request)
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  
+  if (!token || !decodedToken.id) {
+    return next({ name: 'Unauthorized' })
+  }
 
-  const user = await User.findById(body.userId)
+  const user = await User.findById(decodedToken.id)
 
   const note = new Note({
     content: body.content,
@@ -22,7 +37,7 @@ notesRouter.post('/', async (request, response, next) => {
   const savedNote = await note.save()
   user.notes = user.notes.concat(savedNote._id)
   await user.save()
-  
+
   response.json(savedNote)
 })
 
